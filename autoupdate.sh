@@ -18,7 +18,7 @@ OWNER="www-data:www-data"
 # Automatically log the output of this script to a file!
 begin_logging() {
    sudo mkdir -p $LOG_DIR
-   exec > >(tee -a "$LOG_DIR/update_ems_logs-`date +"%d_%m_%Y"`.log") 2>&1
+   exec > >(tee -a "$LOG_DIR/autoupdate_logs-`date +"%d_%m_%Y"`.log") 2>&1
 }
 
 # Project script update! you can change this script depends on your framework
@@ -31,17 +31,13 @@ begin_project_script_update() {
     # Artisan command
     echo -e "Running artisan command \n"
     sleep 2s
-    sudo php artisan migrate -n
+    sudo php artisan migrate -n --force
     sudo php artisan schedule:clear-cache
     sudo php artisan cache:clear
     sudo php artisan view:clear
     sudo php artisan config:clear
     sudo php artisan clear-compiled
-    sudo php artisan hrms:generate-acl -n -u -l
-    #sudo php artisan hrms:generate-permission
-    #sudo php artisan hrms:generate-role -r -u
-    #sudo php artisan hrms:sync-userlocation
-    sudo php artisan activitylog:clean --days=60 -n --force
+    # Add any other command here...
 
     # Suppervisor command
     echo -e "Running supervisor command \n"
