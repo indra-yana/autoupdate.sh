@@ -1,6 +1,5 @@
-# autoupdate.sh
-Shell script for auto update project, add autoupdate.sh script in your cronjob! 
-let's this script do update automatically for your projects. 
+# autoupdate.sh a simple CI/CD implementation for your projects.
+Shell script for auto update project. Add autoupdate.sh script in your cronjob!  
 
 Example:
 ```bash
