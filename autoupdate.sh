@@ -6,7 +6,7 @@ DIR="/home/path-to-project-directory/app"
 
 # Repository branch
 # BRANCH="$(git rev-parse --abbrev-ref HEAD)"  # use auto detect branch
-BRANCH="dev"
+BRANCH="staging"
 
 # Github token
 TOKEN="provide_github_token"
