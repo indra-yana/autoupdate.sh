@@ -82,7 +82,7 @@ begin_logs() {
 cleanup_logs() {
     # Hapus file log yang lebih lama dari 15 hari di dalam LOG_DIR
     find "$LOG_DIR" -type f -name '*.log' -mtime +15 -exec rm -f {} \;
-    echo "🧹 Old logs older than 15 days have been cleaned up."
+    echo "🧹 Cleanup logs: Old logs older than 15 days have been cleaned up."
 }
 
 # -------------------------------
@@ -163,7 +163,8 @@ github_update() {
 # 🔧 Update Project (Laravel)
 # -------------------------------
 project_update() {
-    echo -e "\n📦 Installing dependencies..."
+    echo -e "\n"
+    echo "📦 Installing dependencies..."
 
     composer install -n --no-plugins --no-scripts || { 
         send_whatsapp
@@ -206,6 +207,7 @@ project_update() {
     fi
 
     # Start Supervisor
+    echo -e "\n"
     echo "🚀 Updating supervisor configuration..."
     # supervisord -c /etc/supervisor/supervisord.conf
     if command -v supervisorctl >/dev/null 2>&1; then
@@ -216,6 +218,7 @@ project_update() {
         echo "⚠️ supervisorctl commands not found, please install it."
     fi
 
+    echo -e "\n"
     # NPM install
     echo "🚀 Running npm install using: npm $(npm -v), node $(node -v)..."
     npm install
@@ -224,7 +227,8 @@ project_update() {
     echo "📦 Building frontend assets..."
     npm run build
 
-    echo -e "\n🔒 Fixing permissions..."
+    echo -e "\n"
+    echo "🔒 Fixing permissions for..."
     chown -R "$USER:$USER" "$APP_DIR" || echo "chown: Some files could not be changed"
 
     if command -v php >/dev/null 2>&1; then
@@ -239,7 +243,8 @@ project_update() {
 # ✉️ Send Telegram Notification
 # -------------------------------
 send_telegram() {
-    echo -e "✉️ Sending Telegram notification..."
+    echo -e "\n"
+    echo "✉️ Sending Telegram notification..."
     
     if [[ -z "${TELEGRAM_TOKEN:-}" || -z "${TELEGRAM_CHAT_ID:-}" ]]; then
         echo "⚠️ Skipping Telegram notification: missing one or more required environment variables (TELEGRAM_TOKEN, TELEGRAM_CHAT_ID)"
@@ -258,8 +263,8 @@ send_telegram() {
 # 📤 Send WhatsApp Notifcation
 # -------------------------------
 send_whatsapp() {
-    echo -e "\n✉️ Sending whatsApp notification..."
-    sleep 1s
+    echo -e "\n"
+    echo "✉️ Sending whatsApp notification..."
 
     if [[ -z "${WPP_SESSION:-}" || -z "${WPP_BASE_URL:-}" || -z "${WPP_TOKEN:-}" || -z "${WPP_PHONE:-}" ]]; then
         echo "⚠️ Skipping WhatsApp notification: missing one or more required environment variables (WPP_SESSION, WPP_BASE_URL, WPP_TOKEN, WPP_PHONE)"
@@ -317,7 +322,8 @@ EOF
 # -------------------------------
 main() {
     echo "======================================================="
-    echo "⏳ Updating EMS project on $(date +'%A %d/%m/%Y %H:%M:%S')"
+    echo "⏳ Updating ${APP_NAME} project"
+    echo "🗓️ On $(date +'%A %d/%m/%Y %H:%M:%S')"
     echo "======================================================="
 
     cd "$APP_DIR" || { echo "❌ APP_DIR not found: $APP_DIR"; exit 1; }
@@ -349,7 +355,6 @@ main() {
         echo "⏱ Total execution time: ${elapsed} seconds"
     fi
 
-    echo -e "\n"
     send_whatsapp
     send_telegram
 
