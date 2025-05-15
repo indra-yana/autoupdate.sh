@@ -98,34 +98,41 @@ github_update() {
 
     ORIGIN="$(git remote get-url origin | sed "s#github.com#${GITHUB_TOKEN}@github.com#")"
 
-    echo "🔗 Checking git server (will timeout after: $TIMEOUT)..."
+    # Check if git server reachable
+    echo "🔗 Checking if git server reachable (will timeout after: $TIMEOUT)..."
     if ! timeout "$TIMEOUT" git ls-remote "$ORIGIN" &>/dev/null; then
-        echo "❌ Git server not reachable. Check VPN/internet connection."
+        echo "❌ Git server not reachable. Check VPN / Internet connection."
         send_whatsapp
         exit 1
-    fi
-
-    # Check if remote branch is already fetched
-    if git show-ref --verify --quiet "refs/remotes/origin/$BRANCH"; then
-        echo "✅ Remote branch '$BRANCH' already fetched."
     else
-        echo "🔀 Fetching remote branch: $BRANCH"
-        git fetch "$ORIGIN" "$BRANCH" || {
-            echo "❌ Failed to fetch branch '$BRANCH'"
-            send_whatsapp
-            exit 1
-        }
+        echo "✅ Git server is reachable."
     fi
 
     # Check if remote branch exists
+    echo "🔀 Checking out existing remote branch: $BRANCH"
     if git ls-remote --heads "$ORIGIN" "$BRANCH" | grep -q "$BRANCH"; then
-        echo "🔀 Checking out existing remote branch: $BRANCH"
-        git checkout -b "$BRANCH" 2>/dev/null || git checkout "$BRANCH"
+        echo "✅ Remote branch '$BRANCH' exists. Proceeding to fetch..."
     else
         echo "❌ Remote branch '$BRANCH' does not exist!"
         send_whatsapp
         exit 1
     fi
+
+    # Check if remote branch is already fetched
+    echo "🔀 Fetching remote branch: ${BRANCH}..."
+    git fetch "$ORIGIN" "$BRANCH" || {
+        echo "❌ Failed to fetch branch '$BRANCH'"
+        send_whatsapp
+        exit 1
+    }
+
+    # Checkout the branch
+    echo "📦 Checking out branch: ${BRANCH}..."
+    git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" "origin/$BRANCH" || {
+        echo "❌ Failed to checkout or create tracking branch for '$BRANCH'"
+        send_whatsapp
+        exit 1
+    }
 
     # Check if any changes in local repository
     if [[ -n "$(git status --porcelain)" ]]; then
@@ -245,7 +252,8 @@ send_telegram() {
 # -------------------------------
 send_whatsapp() {
     echo -e "\n✉️ Sending whatsApp notification..."
-    
+    sleep 1s
+
     if [[ -z "${WPP_SESSION:-}" || -z "${WPP_BASE_URL:-}" || -z "${WPP_TOKEN:-}" || -z "${WPP_PHONE:-}" ]]; then
         echo "⚠️ Skipping WhatsApp notification: missing one or more required environment variables (WPP_BASE_URL, WPP_TOKEN, WPP_PHONE)"
         return
