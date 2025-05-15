@@ -196,7 +196,9 @@ project_update() {
         # Run optimize only in production
         if [ "$APP_ENV" = "production" ] || [ "$APP_ENV" = "staging" ]; then
             echo "📦 Running optimization for production..."
-            php artisan optimize
+            # Optional: Unexpected behavior in Laravel 10: the .env file become unreadable!
+            # But you can enable this if needed
+            # php artisan optimize
         else
             echo "ℹ️ Skipping optimize - APP_ENV is not production (current: $APP_ENV)"
         fi
