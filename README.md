@@ -64,8 +64,8 @@ Shell script ini digunakan untuk mengotomatisasi proses update aplikasi berbasis
 ## ⚙️ Tambahan Opsional
 
 - Anda bisa menambahkan logging lebih detail ke dalam file log.
-- Pastikan dependency seperti `git`, `php`, `composer`, `npm`, dan `curl` sudah tersedia di server kamu.
-- Pastikan cron bisa mengakses PATH environment (misal: PHP, Node, Git).
+- Pastikan dependency seperti `git`, `php`, `composer`, `npm`, `supervisor`, dan `curl` sudah tersedia di server kamu.
+- Pastikan cron bisa mengakses PATH environment (misal: PHP, Node, Git, dll).
 - Jalankan manual dulu untuk melihat output dan pastikan semua dependensi tersedia:
    ```bash
    ./autoupdate.v2.sh 
