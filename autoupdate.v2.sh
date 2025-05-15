@@ -77,12 +77,12 @@ begin_logs() {
 }
 
 # -------------------------------
-# 🧹 Log Cleanup (Keep last 30 days)
+# 🧹 Log Cleanup (Keep last 15 days)
 # -------------------------------
 cleanup_logs() {
-    # Hapus file log yang lebih lama dari 30 hari di dalam LOG_DIR
+    # Hapus file log yang lebih lama dari 15 hari di dalam LOG_DIR
     find "$LOG_DIR" -type f -name '*.log' -mtime +15 -exec rm -f {} \;
-    echo "🧹 Old logs older than 30 days have been cleaned up."
+    echo "🧹 Old logs older than 15 days have been cleaned up."
 }
 
 # -------------------------------
@@ -172,34 +172,41 @@ project_update() {
 
     # Laravel artisan commands
     if command -v php >/dev/null 2>&1; then
-        echo "🚀 Starting Laravel deployment commands..."
+        echo "🚀 Starting Laravel artisan commands..."
 
         # Put app in maintenance mode
         echo "🚀 Put app in maintenance mode..."
         php artisan down
 
-        php artisan migrate -n
+        php artisan migrate -n --force
         # php artisan storage:link
         php artisan optimize:clear
         php artisan schedule:clear-cache
-        php artisan hrms:generate-acl -n -u -l || true
-        php artisan activitylog:clean --days=120 -n --force || true
+
+        # Custom command
+        if [ "$APP_ENV" = "production" ] || [ "$APP_ENV" = "staging" ]; then
+            php artisan hrms:generate-acl -n -u || true
+            php artisan activitylog:clean --days=360 -n --force || true
+        else
+            php artisan hrms:generate-acl -n -u -l || true
+            php artisan activitylog:clean --days=120 -n --force || true
+        fi
 
         # Run optimize only in production
         if [ "$APP_ENV" = "production" ] || [ "$APP_ENV" = "staging" ]; then
-            echo "⚙️ Running optimization for production..."
+            echo "📦 Running optimization for production..."
             php artisan optimize
         else
             echo "ℹ️ Skipping optimize - APP_ENV is not production (current: $APP_ENV)"
         fi
 
-        echo "✅ Laravel deployment tasks completed."
+        echo "✅ Laravel artisan commands completed."
     else
-        echo "⚠️ Laravel deployment commands: PHP binary not found, please install it."
+        echo "⚠️ Laravel artisan commands: PHP binary not found, please install it."
     fi
 
     # Start Supervisor
-    echo "🚀 Starting Supervisor configuration..."
+    echo "🚀 Updating supervisor configuration..."
     # supervisord -c /etc/supervisor/supervisord.conf
     if command -v supervisorctl >/dev/null 2>&1; then
         supervisorctl reread
@@ -255,7 +262,7 @@ send_whatsapp() {
     sleep 1s
 
     if [[ -z "${WPP_SESSION:-}" || -z "${WPP_BASE_URL:-}" || -z "${WPP_TOKEN:-}" || -z "${WPP_PHONE:-}" ]]; then
-        echo "⚠️ Skipping WhatsApp notification: missing one or more required environment variables (WPP_BASE_URL, WPP_TOKEN, WPP_PHONE)"
+        echo "⚠️ Skipping WhatsApp notification: missing one or more required environment variables (WPP_SESSION, WPP_BASE_URL, WPP_TOKEN, WPP_PHONE)"
         return
     fi
 
