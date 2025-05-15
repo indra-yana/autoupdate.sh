@@ -57,7 +57,7 @@ Shell script ini digunakan untuk mengotomatisasi proses update aplikasi berbasis
 
    - Fetch dan pull update dari GitHub
    - Jalankan perintah Laravel
-   - Build frontend asset
+   - Build frontend asset (NPM)
    - Kirim notifikasi dan log file melalui Telegram (WIP) atau WhatsApp (Using WppConnect Server).
    - Simpan log ke updatelogs.d
 
@@ -74,6 +74,7 @@ Shell script ini digunakan untuk mengotomatisasi proses update aplikasi berbasis
    ```
 - Gunakan VPS/server yang stabil untuk menghindari kegagalan saat fetch/pull.
 - Anda bisa menggunakan [autoupdate.sh versi 1](https://github.com/indra-yana/autoupdate.sh/blob/master/autoupdate.sh) untuk workflow yang lebih sederhana
+- [Optional] Gunakan sudo untuk eksekusi file
 
 ---
 
