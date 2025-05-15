@@ -1,3 +1,4 @@
 .env
 update_ems.dev.sh
 update_ems.dev.v2.posix.sh
+/updatelogs.d
