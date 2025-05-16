@@ -89,7 +89,8 @@ cleanup_logs() {
 # 🔄 Update from GitHub
 # -------------------------------
 github_update() {
-    echo -e "\n🚀 Running GitHub script update..."
+    echo -e "\n"
+    echo "🚀 Running GitHub script update..."
 
     if [ -z "$GITHUB_TOKEN" ]; then
         echo "❌ GitHub token is empty. Please provide it to continue!"
@@ -322,6 +323,7 @@ EOF
 # 🚀 Entry Point
 # -------------------------------
 main() {
+    echo -e "\n"
     echo "======================================================="
     echo "⏳ Updating ${APP_NAME} project"
     echo "🗓️ On $(date +'%A %d/%m/%Y %H:%M:%S')"
@@ -330,14 +332,28 @@ main() {
     cd "$APP_DIR" || { echo "❌ APP_DIR not found: $APP_DIR"; exit 1; }
     start_time=$(date +%s)
 
-    if [[ "${1:-}" == "--skip-git" ]]; then
+    SKIP_GIT=false
+    SKIP_NOTIF=false
+
+    # Handle arguments
+    for arg in "$@"; do
+        case $arg in
+            --skip-git)
+                SKIP_GIT=true
+                ;;
+            --skip-notif)
+                SKIP_NOTIF=true
+                ;;
+        esac
+    done
+
+    if [ "$SKIP_GIT" = true ]; then
         echo "⏭️ Skipping Git update as requested with --skip-git"
-        project_update
     else
         github_update
-        project_update
     fi
 
+    project_update
     cleanup_logs
     
     end_time=$(date +%s)
@@ -356,8 +372,12 @@ main() {
         echo "⏱ Total execution time: ${elapsed} seconds"
     fi
 
-    send_whatsapp
-    send_telegram
+    if [ "$SKIP_NOTIF" = true ]; then
+        echo "⏭️ Skipping Notification as requested with --skip-notif"
+    else
+        send_whatsapp
+        send_telegram
+    fi
 
     exit 0
 }
