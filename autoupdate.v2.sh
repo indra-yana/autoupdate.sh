@@ -147,7 +147,6 @@ github_update() {
 
     if [[ "$LOCAL_COMMIT" == "$REMOTE_COMMIT" ]]; then
         echo "✅ No changes in remote repository."
-        send_whatsapp
         exit 0
     fi
 
